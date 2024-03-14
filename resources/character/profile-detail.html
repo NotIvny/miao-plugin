@@ -15,7 +15,7 @@
 {{block 'main'}}
 <div class="profile-cont game-{{game}}">
   <div class="basic">
-    <div class="main-pic" style="background-image:url({{_res_path}}{{costumeSplash||imgs?.splash}})"></div>
+    <div class="main-pic" style="background-image:url({{_res_path}}{{imgs.splash}})"></div>
     <div class="detail">
       <div class="char-name">{{data.name}}</div>
       <div class="char-lv">UID {{uid}} - Lv.{{data.level}}
@@ -292,7 +292,7 @@
           <div class="value value-none"></div>
           {{else}}
           <div class="value">{{dmg.dmg}}{{dmg.unit}}</div>
-          <div class="value">{{dmg.avg}}{{dmg.unit}}</div>
+          <div class="value0">{{dmg.avg}}{{dmg.unit}}</div>
           {{/if}}
         </div>
         {{/each}}

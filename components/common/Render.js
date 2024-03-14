@@ -26,10 +26,11 @@ const Render = {
           _tpl_path: process.cwd() + '/plugins/miao-plugin/resources/common/tpl/',
           defaultLayout: layoutPath + 'default.html',
           elemLayout: layoutPath + 'elem.html',
+          addonLayout: layoutPath + 'addon.html',
           sys: {
             scale: Cfg.scale(cfg.scale || 1)
           },
-          copyright: `Created By ${Version.name}<span class="version">${Version.yunzai}</span>${pluginName}</span>`,
+          copyright: `<span class="addons">Created By</span> ${Version.name}<span class="version">${Version.yunzai}</span>${pluginName}</span>`,
           pageGotoParams: {
             waitUntil: 'networkidle2'
           }

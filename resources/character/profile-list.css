@@ -10,6 +10,19 @@ body,
 }
 .head-box .label {
   font-size: 14px;
+  background: linear-gradient(90deg,#00ffff,#ffff00);
+  -webkit-text-fill-color: transparent;        
+  -webkit-background-clip: text;
+}
+.head-box .label span {
+  background: linear-gradient(90deg, #ff4000 10%, #ffff00 85%);
+  -webkit-text-fill-color: transparent;        
+  -webkit-background-clip: text;
+}
+.head-box .title {
+  background: linear-gradient(90deg,#00ffff,#ffff00  40%);
+  -webkit-text-fill-color: transparent;        
+  -webkit-background-clip: text;
 }
 .char-list {
   display: flex;
@@ -110,9 +123,15 @@ body,
 }
 .cont-footer span {
   width: 50%;
+  background: linear-gradient(90deg,#00ffff 5%, #ffff00 35%);
+  -webkit-text-fill-color: transparent;        
+  -webkit-background-clip: text;
 }
 .cont-footer .serv {
   text-align: right;
+  background: linear-gradient(90deg,#00ffff, #ffff00);
+  -webkit-text-fill-color: transparent;        
+  -webkit-background-clip: text;
 }
 .cont-footer .new-tip:before {
   content: "";
