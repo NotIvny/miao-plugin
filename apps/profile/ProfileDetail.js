@@ -1,6 +1,10 @@
+/* eslint-disable import/no-unresolved */
 import lodash from "lodash"
 import ProfileList from "./ProfileList.js"
 import { getTargetUid, getProfileRefresh } from "./ProfileCommon.js"
+import Gscfg from '../../../genshin/model/gsCfg.js'
+import { ArkApi } from '../stat/ArkApi.js'
+//import ArkCfg from '../../../ark-plugin/components/Cfg.js'
 import ProfileChange from "./ProfileChange.js"
 import { profileArtis } from "./ProfileArtis.js"
 import { ProfileWeapon } from "./ProfileWeapon.js"
@@ -216,9 +220,97 @@ let ProfileDetail = {
       data.treeData = treeData
     }
     data.weapon = profile.getWeaponDetail()
+     let selfRank = []
+    let scoreAndRank = []
+    let ret1,ret2
+    //是否计算总排名
+    if (1 /*ArkCfg.get('panelRank', true)*/ && dmgCalc.dmgData !== undefined) {
+      let characterID = Gscfg.roleNameToID(char.name, true) || Gscfg.roleNameToID(char.name, false)
+      let ret, jsonData
+      let queryType = 3/*ArkCfg.get('queryType', 2)*/
+      const query = {
+        0: 'dmg',
+        1: 'mark',
+        2: 'all',
+        3: 'all',
+      }[queryType]
+      //是否使用本地数据计算排名
+      if (1 /*ArkCfg.get('localPanelRank', true)*/) {
+        jsonData = JSON.parse(JSON.stringify(profile))
+        ret = await ArkApi.post('/rank/query', {
+          id: characterID,
+          uid: '999999999',
+          update: 0,
+          query: query,
+          data: jsonData
+        })
+      } else {
+        ret = await ArkApi.post('/rank/query', {
+          id: characterID,
+          uid: uid,
+          query: query,
+          update: 0
+        })
+      }
+      const getRank = (index, baseTitle) => {
+        const retItem = ret[index]
+        const rankType = 2/*ArkCfg.get('RankType', 0)*/
+        if (retItem?.retcode !== 100 && rankType != 2) return
+        const characterRank = {
+          0: retItem?.rank || '暂无数据',
+          1: retItem?.percent || '暂无数据',
+          2: retItem?.rank ? `${retItem?.rank} (${retItem?.percent}%)` : '暂无数据',
+        }[rankType]
+        const markRankType = 0/*ArkCfg.get('markRankType', false)*/
+        const isSpecialPanel = e.msg.includes('喵喵面板变换') && markRankType
+        const title = isSpecialPanel 
+          ? `${baseTitle}(面板变换)` 
+          : `${baseTitle}${markRankType ? '(本地)' : ''}`
+        if (queryType === 3) {
+          scoreAndRank[index] = characterRank
+          selfRank.push(...[
+            ret[index]?.percent || -100,
+            ret[index]?.score || -100
+          ])
+        } else {
+          dmgCalc.dmgData.push({ title, unit: characterRank })
+        }
+      }
+      ret = Array.isArray(ret) ? ret : [ret]
+      switch (queryType) {
+        case 0:
+          getRank(0, '总伤害排名')
+          break
+        case 1:
+          getRank(0, '圣遗物排名')
+          break
+        case 2:
+          getRank(0, '总伤害排名')
+          getRank(1, '圣遗物排名')
+          break
+        case 3:
+          getRank(0, '总伤害排名')
+          getRank(1, '圣遗物排名')
+          ret1 = await ArkApi.post('/rank/specific', {
+            id: characterID,
+            percent: 0
+          })
+          ret2 = await ArkApi.post('/rank/specific', {
+            id: characterID,
+            artis: true,
+            percent: 0
+          })
+          break
+      }
+    }
     let background = await Common.getBackground("profile")
-
+    logger.error(ret1?.data?.scores?.map(score => (score / (ret1?.data?.top1 ?? 1)) * 100))
     let renderData = {
+      dmgRankData: ret1?.data?.scores?.map(score => (score / (ret1?.data?.top1 ?? 1)) * 100),
+      artisRankData: ret2?.data?.scores,
+      top1: ret2?.data?.top1,
+      scoreAndRank,
+      selfRank,
       save_id: uid,
       uid,
       game,
