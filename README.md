@@ -1,5 +1,7 @@
 # 说明
 
+内置 ark-plugin 角色排名拓展/幽境危战排名 功能的fork版喵喵插件，接口正在迁移为RESTful API，**暂不可用**
+
 此仓库为个人fork版本自用
 
 此仓库将在原仓库有更新时测试后推送同步，可能更新不及时...推荐使用原版 [miao-plugin](https://github.com/yoimiya-kokomi/miao-plugin)
