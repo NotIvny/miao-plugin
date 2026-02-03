@@ -9,7 +9,7 @@ import ProfileChange from "./ProfileChange.js"
 import { profileArtis } from "./ProfileArtis.js"
 import { ProfileWeapon } from "./ProfileWeapon.js"
 import { Cfg, Common, Format } from "#miao"
-import { Button, MysApi, ProfileRank, Character, Weapon, Artifact } from "#miao.models"
+import { Button, MysApi, ProfileRank, Character, Weapon, Artifact, Player } from "#miao.models"
 
 // let { diyCfg } = await Data.importCfg("profile")
 
@@ -220,7 +220,42 @@ let ProfileDetail = {
       data.treeData = treeData
     }
     data.weapon = profile.getWeaponDetail()
-     let selfRank = []
+    const isProfileChange = e.msg.includes('喵喵面板变换')
+    if (isProfileChange) {
+      let player = Player.create(uid, game)
+      let origin = player.getProfile(char.id)
+      let dmgCalc_ = await ProfileDetail.getProfileDmgCalc({ profile: origin, enemyLv, mode, params })
+      if (dmgCalc_ && dmgCalc_.dmgData) {
+        const num = (str) => {
+          if (!str || str === 'NaN') return NaN
+          return parseFloat(String(str).replace(/,/g, ''))
+        }
+        const getDiff = (currStr, oldStr) => {
+          let curr = num(currStr)
+          let old = num(oldStr)
+          if (isNaN(curr) || isNaN(old) || old === 0) return '--'  
+          let diff = ((curr - old) / old * 100).toFixed(1)
+          if (diff > 0) return ` ↑${diff}%`
+          if (diff < 0) return ` ↓${Math.abs(diff)}%`
+          if (diff == 0) return `${diff}%`
+          return '--'
+        }
+        dmgCalc.dmgData = dmgCalc.dmgData.map(item => {
+          let matchedItem = dmgCalc_.dmgData.find(d => d.title === item.title)   
+          if (matchedItem) {
+            return {
+              ...item,
+              dmg: item.dmg,
+              dmg_diff: getDiff(item.dmg, matchedItem.dmg),
+              avg: item.avg,
+              avg_diff: getDiff(item.avg, matchedItem.avg)
+            }
+          }
+          return item
+        })
+      }
+    }
+    let selfRank = []
     let scoreAndRank = []
     let ret1,ret2
     //是否计算总排名
@@ -262,7 +297,7 @@ let ProfileDetail = {
           2: retItem?.rank ? `${retItem?.rank} (${retItem?.percent}%)` : '暂无数据',
         }[rankType]
         const markRankType = 0/*ArkCfg.get('markRankType', false)*/
-        const isSpecialPanel = e.msg.includes('喵喵面板变换') && markRankType
+        const isSpecialPanel = isProfileChange && markRankType
         const title = isSpecialPanel 
           ? `${baseTitle}(面板变换)` 
           : `${baseTitle}${markRankType ? '(本地)' : ''}`
